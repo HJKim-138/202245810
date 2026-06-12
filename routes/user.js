@@ -1,0 +1,78 @@
+const express = require('express');
+const bcrypt = require('bcrypt');
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+const router = express.Router();
+const dbPath = path.join(__dirname, '../db/database.sqlite');
+const db = new sqlite3.Database(dbPath);
+
+// 회원가입 페이지
+router.get('/register', (req, res) => {
+    res.render('register'); //register.ejs
+});
+
+// 회원가입 처리
+router.post('/register', async (req, res) => {
+    const { username, password, name } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    db.run(
+        'INSERT INTO users (username, password, name) VALUES (?, ?, ?)',
+        [username, hashedPassword, name],
+        (err) => {
+            if (err) {
+                console.error(err.message);
+                return res.send('회원가입 실패');
+            }
+            res.redirect('/user/login');
+        }
+    );
+});
+
+// 로그인 페이지
+router.get('/login', (req, res) => {
+    res.render('login'); //login.ejs
+});
+
+// 로그인 처리
+router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // 탈퇴한 회원일 경우 로그인이 불가하도록 수정
+    db.get('SELECT * FROM users WHERE username = ? AND status = \'ACTIVE\'', [username], async (err, user) => {
+
+        // 탈퇴 기능 추가에 따라 예외 처리 부분 수정
+        if (err) {
+            console.error('로그인 조회 오류:', err.message);
+            return res.status(500).send('로그인 처리 중 오류가 발생했습니다.');
+        }
+        if (!user) {
+            return res.send('존재하지 않거나 탈퇴한 사용자입니다.');
+        }
+
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
+            req.session.user = user;
+            res.redirect('/');
+        } else {
+            res.status(401).render('login_failed');
+        }
+    });
+});
+
+// 로그아웃
+// router.get('/logout', (req, res) => {
+//     req.session.destroy();
+//     res.redirect('/');
+// });
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('❌ 로그아웃 오류:', err);
+        }
+        res.redirect('/');
+    });
+});
+
+module.exports = router;

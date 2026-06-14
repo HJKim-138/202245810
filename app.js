@@ -14,6 +14,7 @@ const cartRouter = require('./routes/cart');
 const orderRouter = require('./routes/order');
 const mypageRouter = require('./routes/mypage');
 const wishlistRouter = require('./routes/wishlist');
+const adminRouter = require('./routes/admin');
 
 var app = express();
 
@@ -50,6 +51,7 @@ app.use('/cart', cartRouter);
 app.use('/order',orderRouter);
 app.use('/mypage', mypageRouter);
 app.use('/wishlist', wishlistRouter);
+app.use('/admin', adminRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

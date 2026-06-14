@@ -15,9 +15,16 @@ const db = new sqlite3.Database('./db/database.sqlite');
 router.post('/add/:productId', (req, res) => {
     const user = req.session.user;
 
-    // 로그인하지 않은 사용자는 로그인 페이지로 이동
+    // 로그인하지 않은 사용자는 로그인 요청 팝업 알림을 띄우기
     if (!user) {
-        return res.redirect('/login');
+        return res.send(`
+        <script>
+            alert('로그인 후 이용해주시기 바랍니다.');
+            history.back();
+        </script>
+    `);
+        // 로그인 창으로 이동
+        // return res.redirect('/login');
     }
 
     const productId = req.params.productId;

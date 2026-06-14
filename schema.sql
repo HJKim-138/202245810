@@ -8,7 +8,11 @@ CREATE TABLE IF NOT EXISTS users (
                                      -- 회원 상태(회원 탈퇴/재가입 구현을 위해 추가)
                                      -- ACTIVE: 정상 회원
                                      -- DELETED: 탈퇴 회원
-                                     status TEXT DEFAULT 'ACTIVE'
+                                     status TEXT DEFAULT 'ACTIVE',
+
+                                     -- 관리자 여부
+                                     -- 현재 관리자 ID: admin, PW: admin
+                                     is_admin INTEGER DEFAULT 0
 );
 
 -- 게시글 테이블
